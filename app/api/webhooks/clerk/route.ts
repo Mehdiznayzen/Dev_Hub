@@ -133,16 +133,24 @@ export async function POST(request: Request) {
       }
     );
   } catch (error) {
-    console.error('Clerk webhook error:', error);
+    console.error('========== CLERK WEBHOOK ERROR ==========');
+    console.error(error);
+
+    if (error instanceof Error) {
+        console.error('Message:', error.message);
+        console.error('Stack:', error.stack);
+    }
+
+    console.error('==========================================');
 
     return Response.json(
-      {
-        success: false,
-        message: 'Webhook processing failed',
-      },
-      {
-        status: 400,
-      }
+        {
+            success: false,
+            message: 'Webhook processing failed',
+        },
+        {
+            status: 400,
+        }
     );
   }
 }
