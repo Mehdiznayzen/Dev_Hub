@@ -4,20 +4,28 @@ import { verifyWebhook } from '@clerk/backend/webhooks';
 import { eq } from 'drizzle-orm';
 
 export async function POST(request: Request) {
+  console.log('========== WEBHOOK START ==========');
+
   try {
+    console.log('1. Vérification du webhook...');
+
     const event = await verifyWebhook(request);
 
-    console.log('Clerk webhook:', event.type);
+    console.log('2. Webhook vérifié:', event.type);
 
     switch (event.type) {
-      // ==========================================
-      // USER CREATED
-      // ==========================================
       case 'user.created': {
         const user = event.data;
+
+        console.log('3. User reçu:', user.id);
+
         const email = user.email_addresses?.[0]?.email_address;
 
+        console.log('4. Email:', email);
+
         if (!email) {
+          console.error('5. EMAIL MANQUANT');
+
           return Response.json(
             {
               success: false,
@@ -27,102 +35,103 @@ export async function POST(request: Request) {
           );
         }
 
-        console.log('USER CREATED:', {
-          id: user.id,
-          email,
-          username: user.username,
-        });
+        console.log('6. Tentative insertion DB...');
 
-        await db.insert(users).values({
+        const result = await db
+          .insert(users)
+          .values({
             id: crypto.randomUUID(),
             clerkUserId: user.id,
             email,
             username: user.username ?? null,
-          }).onConflictDoNothing({
-            target: users.clerkUserId,
-          });
+          })
+          .returning();
+
+        console.log('7. UTILISATEUR INSÉRÉ:', result);
 
         break;
       }
 
-      // ==========================================
-      // USER UPDATED
-      // ==========================================
       case 'user.updated': {
         const user = event.data;
 
-        // Vérifier que l'ID existe
         if (!user.id) {
-          return Response.json(
+            console.error('Clerk user ID not found');
+
+            return Response.json(
             {
-              success: false,
-              message: 'Clerk user ID not found',
+                success: false,
+                message: 'Clerk user ID not found',
             },
             { status: 400 }
-          );
+            );
         }
 
         const email = user.email_addresses?.[0]?.email_address;
 
         if (!email) {
-          return Response.json(
+            return Response.json(
             {
-              success: false,
-              message: 'User email not found',
+                success: false,
+                message: 'User email not found',
             },
             { status: 400 }
-          );
+            );
         }
 
         console.log('USER UPDATED:', {
-          id: user.id,
-          email,
-          username: user.username,
+            id: user.id,
+            email,
+            username: user.username,
         });
 
-        await db.update(users).set({
-            email,
-            username: user.username ?? null,
-            updatedAt: new Date(),
-          })
-          .where(eq(users.clerkUserId, user.id));
+        const result = await db
+            .update(users)
+            .set({
+                email,
+                username: user.username ?? null,
+                updatedAt: new Date(),
+            })
+            .where(eq(users.clerkUserId, user.id))
+            .returning();
 
-        break;
-      }
+            console.log('USER UPDATED IN DB:', result);
 
-      // ==========================================
-      // USER DELETED
-      // ==========================================
-      case 'user.deleted': {
-        const user = event.data;
-
-        // Vérifier que l'ID existe
-        if (!user.id) {
-          return Response.json(
-            {
-              success: false,
-              message: 'Clerk user ID not found',
-            },
-            { status: 400 }
-          );
+            break;
         }
 
-        console.log('USER DELETED:', user.id);
+        case 'user.deleted': {
+            const user = event.data;
 
-        await db
-          .delete(users)
-          .where(eq(users.clerkUserId, user.id));
+            if (!user.id) {
+                console.error('Clerk user ID not found');
 
-        break;
-      }
+                return Response.json(
+                {
+                    success: false,
+                    message: 'Clerk user ID not found',
+                },
+                { status: 400 }
+                );
+            }
 
-      // ==========================================
-      // OTHER EVENTS
-      // ==========================================
-      default: {
-        console.log('Unhandled Clerk event:', event.type);
-      }
-    }
+            console.log('USER DELETED:', user.id);
+
+            const result = await db
+                .delete(users)
+                .where(eq(users.clerkUserId, user.id))
+                .returning();
+
+            console.log('USER DELETED FROM DB:', result);
+
+            break;
+        }
+
+        default:
+            console.log('Unhandled Clerk event:', event.type);
+        }
+
+    console.log('========== WEBHOOK SUCCESS ==========');
 
     return Response.json(
       {
@@ -133,24 +142,24 @@ export async function POST(request: Request) {
       }
     );
   } catch (error) {
-    console.error('========== CLERK WEBHOOK ERROR ==========');
+    console.error('========== WEBHOOK ERROR ==========');
     console.error(error);
 
     if (error instanceof Error) {
-        console.error('Message:', error.message);
-        console.error('Stack:', error.stack);
+      console.error('ERROR MESSAGE:', error.message);
+      console.error('ERROR STACK:', error.stack);
     }
 
-    console.error('==========================================');
+    console.error('====================================');
 
     return Response.json(
-        {
-            success: false,
-            message: 'Webhook processing failed',
-        },
-        {
-            status: 400,
-        }
+      {
+        success: false,
+        message: 'Webhook processing failed',
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
