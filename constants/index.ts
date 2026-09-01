@@ -1,7 +1,16 @@
 import { Feature } from "@/types";
-import { Share2, MessageCircleQuestion, Code2, Users } from 'lucide-react';
+import { Share2, MessageCircleQuestion, Code2, Users, LucideIcon } from 'lucide-react';
 import { SiGithub, SiX } from "react-icons/si";
 import { FaLinkedin } from "react-icons/fa6";
+import {
+  Server,
+  Layers,
+  Smartphone,
+  Container,
+  Cpu,
+  Brain,
+  GraduationCap,
+} from 'lucide-react';
 
 // Navbar Component
 export const navLinks = [
@@ -105,4 +114,30 @@ export const socials = [
   { icon: SiGithub, label: 'GitHub', href: '#' },
   { icon: FaLinkedin, label: 'LinkedIn', href: '#' },
   { icon: SiX, label: 'Twitter / X', href: '#' },
+];
+
+// Profile Page
+export const decorativeSnippets = [
+  { text: '</>', className: 'left-[5%] top-[14%] animate-float' },
+  { text: '{ }', className: 'right-[6%] top-[20%] animate-float-slow delay-200' },
+  { text: '0101', className: 'left-[8%] bottom-[16%] animate-float-slow delay-300' },
+  { text: 'const developer = {}', className: 'right-[5%] bottom-[22%] animate-float delay-500' },
+  { text: 'git push', className: 'left-[12%] top-[52%] animate-float delay-700' },
+];
+
+// Role Selector Component
+type Role = {
+  label: string;
+  icon: LucideIcon;
+};
+
+export const roles: Role[] = [
+  { label: 'Frontend Developer', icon: Code2 },
+  { label: 'Backend Developer', icon: Server },
+  { label: 'Full Stack Developer', icon: Layers },
+  { label: 'Mobile Developer', icon: Smartphone },
+  { label: 'DevOps Engineer', icon: Container },
+  { label: 'Software Engineer', icon: Cpu },
+  { label: 'Data Scientist', icon: Brain },
+  { label: 'Student', icon: GraduationCap },
 ];
