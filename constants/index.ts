@@ -141,3 +141,71 @@ export const roles: Role[] = [
   { label: 'Data Scientist', icon: Brain },
   { label: 'Student', icon: GraduationCap },
 ];
+
+// Skill Tags Component
+export const availableSkills = [
+  // Core & Frontend (Existant + Nouveautés)
+  'React',
+  'Next.js',
+  'TypeScript',
+  'JavaScript',
+  'Vue.js',
+  'Angular',
+  'Nuxt.js',
+  'Svelte',
+  'HTML5',
+  'CSS3',
+  'Tailwind CSS',
+  'Sass',
+  'Redux',
+
+  // Backend & Langages (Existant + Nouveautés)
+  'Node.js',
+  'Express',
+  'NestJS',
+  'Python',
+  'Django',
+  'FastAPI',
+  'PHP',
+  'Laravel',
+  'Java',
+  'Spring Boot',
+  'C#',
+  'NET',
+  'Go',
+  'Rust',
+
+  // Databases (Existant + Nouveautés)
+  'SQL',
+  'MySQL',
+  'PostgreSQL',
+  'MongoDB',
+  'Redis',
+  'Firebase',
+  'Supabase',
+  'Prisma',
+
+  // DevOps & Cloud (Existant + Nouveautés)
+  'Git',
+  'GitHub',
+  'Docker',
+  'Kubernetes',
+  'AWS',
+  'Azure',
+  'GCP',
+  'CI/CD',
+  'Linux',
+
+  // Mobile & Desktop
+  'React Native',
+  'Flutter',
+  'Swift',
+  'Kotlin',
+
+  // Testing & Performance
+  'Jest',
+  'Cypress',
+  'Playwright',
+  'GraphQL',
+  'REST API',
+];

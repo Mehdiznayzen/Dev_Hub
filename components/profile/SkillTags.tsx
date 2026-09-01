@@ -1,5 +1,6 @@
 'use client';
 
+import { availableSkills } from '@/constants';
 import { Plus, X } from 'lucide-react';
 import { useState } from 'react';
 
@@ -7,26 +8,6 @@ interface SkillTagsProps {
   skills: string[];
   setSkills: (skills: string[]) => void;
 }
-
-const availableSkills = [
-  'React',
-  'Next.js',
-  'TypeScript',
-  'JavaScript',
-  'Node.js',
-  'Express',
-  'Python',
-  'PHP',
-  'Laravel',
-  'Java',
-  'Spring Boot',
-  'SQL',
-  'MySQL',
-  'MongoDB',
-  'Tailwind CSS',
-  'Git',
-  'Docker',
-];
 
 const SkillTags = ({ skills, setSkills }: SkillTagsProps) => {
   const [showSkills, setShowSkills] = useState(false);

@@ -46,6 +46,10 @@ const ProfileForm = ({ disabled, setAvatarUrl, fullName, setFullName, bio, setBi
         { value: bio, weight: 15 },
         { value: role, weight: 15 },
         { value: experience, weight: 10 },
+
+
+
+        
         { value: skills.length > 0, weight: 15 },
         { value: location, weight: 5 },
         { value: github, weight: 5 },
