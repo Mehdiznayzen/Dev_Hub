@@ -6,10 +6,15 @@ import { cn } from '@/lib/utils';
 import { navLinks } from '@/constants';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Button } from './ui/button';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const router = useRouter();
+  const { isSignedIn, user } = useUser();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -32,7 +37,7 @@ const Navbar = () => {
   return (
     <header
       className={cn(
-        'fixed inset-x-0 top-0 z-50 transition-all duration-300',
+        'fixed inset-x-0 top-0 z-50 transition-all duration-300 p-1',
         scrolled
           ? 'border-b border-border/60 bg-background/80 backdrop-blur-xl'
           : 'border-b border-transparent bg-transparent'
@@ -69,18 +74,29 @@ const Navbar = () => {
         </ul>
 
         <div className="hidden items-center gap-3 md:flex">
-          <a
-            href="#"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Log in
-          </a>
-          <a
-            href="#"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30"
+          {
+            !isSignedIn && (
+              <Link
+                href="/sign-in"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Log in
+              </Link>
+            )
+          }
+          <Button
+            className="rounded-lg cursor-pointer bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30"
+            onClick={() => {
+              if(isSignedIn) {
+                router.push(`/profile/${user.id}`);
+                return;
+              }
+
+              router.push('/sign-up');
+            }}
           >
             Get Started
-          </a>
+          </Button>
         </div>
 
         <button
@@ -113,20 +129,29 @@ const Navbar = () => {
             </a>
           ))}
           <div className="mt-4 flex flex-col gap-3 border-t border-border/60 pt-4">
-            <a
-              href="#"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-lg px-3 py-3 text-center text-base font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-            >
-              Log in
-            </a>
-            <a
-              href="#"
-              onClick={() => setMobileOpen(false)}
-              className="rounded-lg bg-primary px-3 py-3 text-center text-base font-semibold text-primary-foreground shadow-lg shadow-primary/20"
+            {
+              !isSignedIn && (
+                <Link
+                  href="/sign-in"
+                  className="rounded-lg px-3 py-3 text-center text-base font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                >
+                  Log in
+                </Link>
+              )
+            }
+            <Button
+              className="rounded-lg cursor-pointer bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30"
+              onClick={() => {
+                if(isSignedIn) {
+                  router.push(`/profile/${user.username}`);
+                  return;
+                }
+
+                router.push('/sign-up');
+              }}
             >
               Get Started
-            </a>
+            </Button>
           </div>
         </div>
       </div>
