@@ -22,12 +22,12 @@ const ProfilePage = () => {
   const [linkedin, setLinkedin] = useState<string>('');
 
   useEffect(() => {
-    if (fullName.trim() && bio.trim() && role.trim() && experience.trim() && skills.length > 0 && location.trim() && website.trim() && github.trim() && linkedin.trim()) {
+    if (avatarUrl?.trim() && fullName.trim() && bio.trim() && role.trim() && experience.trim() && skills.length > 0 && location.trim() && website.trim() && github.trim() && linkedin.trim()) {
       setDisabled(false);
     } else {
       setDisabled(true);
     }
-  }, [fullName, bio, role, experience, skills, location, website, github, linkedin]);
+  }, [avatarUrl, fullName, bio, role, experience, skills, location, website, github, linkedin]);
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -72,6 +72,7 @@ const ProfilePage = () => {
           <div className="lg:col-span-3">
             <ProfileForm 
               disabled={disabled}
+              avatarUrl={avatarUrl}
               setAvatarUrl={setAvatarUrl} 
               fullName={fullName}
               setFullName={setFullName} 

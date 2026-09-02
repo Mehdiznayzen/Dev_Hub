@@ -88,7 +88,7 @@ const Navbar = () => {
             className="rounded-lg cursor-pointer bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30"
             onClick={() => {
               if(isSignedIn) {
-                router.push(`/profile/${user.id}`);
+                router.push(`/profile`);
                 return;
               }
 
@@ -143,7 +143,7 @@ const Navbar = () => {
               className="rounded-lg cursor-pointer bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30"
               onClick={() => {
                 if(isSignedIn) {
-                  router.push(`/profile/${user.username}`);
+                  router.push(`/profile`);
                   return;
                 }
 

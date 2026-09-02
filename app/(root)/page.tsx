@@ -7,7 +7,7 @@ import Technologies from '@/components/Technologies';
 import CTA from '@/components/CTA';
 import Footer from '@/components/Footer';
 
-export default function Home() {
+const Home = () => {
   return (
     <>
       <Navbar />
@@ -23,3 +23,5 @@ export default function Home() {
     </>
   );
 }
+
+export default Home;
