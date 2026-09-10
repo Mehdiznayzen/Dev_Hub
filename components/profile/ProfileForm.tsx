@@ -80,7 +80,7 @@ const ProfileForm = ({ disabled, avatarUrl, setAvatarUrl, fullName, setFullName,
             });
 
             if(response.status === 200){
-                router.push(`/dashboard/${response.data.profile.userId}`);
+                router.push(`/dashboard/${response.data.profile.userId}/questions`);
             }
 
             const data = await response.data;
@@ -166,7 +166,7 @@ const ProfileForm = ({ disabled, avatarUrl, setAvatarUrl, fullName, setFullName,
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
                 <Link
-                    href={`/dashboard/${user?.id}`}
+                    href={`/dashboard/${user?.id}/questions`}
                     className="text-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
                     Skip for now

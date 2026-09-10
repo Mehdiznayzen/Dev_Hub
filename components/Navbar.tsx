@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Code2 } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { navLinks } from '@/constants';
 import Image from 'next/image';
@@ -9,18 +9,35 @@ import Link from 'next/link';
 import { Button } from './ui/button';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
+import axios from 'axios';
 
 const Navbar = () => {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState<boolean>(false);
+  const [mobileOpen, setMobileOpen] = useState<boolean>(false);
+  const [isExistingProfile, setIsExistingProfile] = useState<boolean>(false);  
   const router = useRouter();
   const { isSignedIn, user } = useUser();
 
   useEffect(() => {
+    const getProfile = async () => {
+      try {
+        const response = await axios.get(process.env.NEXT_PUBLIC_API_GET_PROFILE!);
+
+        const data = await response.data;
+
+        setIsExistingProfile(!!data.profile)
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    }
+
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      getProfile();
+    }
   }, []);
 
   useEffect(() => {
@@ -87,8 +104,8 @@ const Navbar = () => {
           <Button
             className="rounded-lg cursor-pointer bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30"
             onClick={() => {
-              if(isSignedIn) {
-                router.push(`/profile`);
+              if(isExistingProfile) {
+                router.push(`/dashboard/${user?.id}/questions`);
                 return;
               }
 
@@ -142,8 +159,8 @@ const Navbar = () => {
             <Button
               className="rounded-lg cursor-pointer bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30"
               onClick={() => {
-                if(isSignedIn) {
-                  router.push(`/profile`);
+                if(isExistingProfile) {
+                  router.push(`/dashboard/${user?.id}/questions`);
                   return;
                 }
 

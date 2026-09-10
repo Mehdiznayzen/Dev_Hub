@@ -10,7 +10,23 @@ import {
   Cpu,
   Brain,
   GraduationCap,
-} from 'lucide-react';
+  Database,
+  Cloud,
+  ShieldCheck,
+  Palette,
+  Terminal,
+  GitBranch,
+  BarChart3,
+  Bot,
+  Network,
+  TestTube2,
+  Settings,
+  Gamepad2,
+  Globe,
+  Blocks,
+  Search,
+} from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
 
 // Navbar Component
 export const navLinks = [
@@ -132,14 +148,42 @@ type Role = {
 };
 
 export const roles: Role[] = [
-  { label: 'Frontend Developer', icon: Code2 },
-  { label: 'Backend Developer', icon: Server },
-  { label: 'Full Stack Developer', icon: Layers },
-  { label: 'Mobile Developer', icon: Smartphone },
-  { label: 'DevOps Engineer', icon: Container },
-  { label: 'Software Engineer', icon: Cpu },
-  { label: 'Data Scientist', icon: Brain },
-  { label: 'Student', icon: GraduationCap },
+  { label: "Frontend Developer", icon: Code2 },
+  { label: "Backend Developer", icon: Server },
+  { label: "Full Stack Developer", icon: Layers },
+  { label: "Mobile Developer", icon: Smartphone },
+
+  { label: "DevOps Engineer", icon: Container },
+  { label: "Software Engineer", icon: Cpu },
+  { label: "Data Scientist", icon: Brain },
+  { label: "Data Engineer", icon: BarChart3 },
+
+  { label: "Database Administrator", icon: Database },
+  { label: "Cloud Engineer", icon: Cloud },
+  { label: "Cybersecurity Engineer", icon: ShieldCheck },
+  { label: "Network Engineer", icon: Network },
+
+  { label: "Machine Learning Engineer", icon: Bot },
+  { label: "AI Engineer", icon: Brain },
+  { label: "QA Engineer", icon: TestTube2 },
+  { label: "Automation Engineer", icon: Settings },
+
+  { label: "Game Developer", icon: Gamepad2 },
+  { label: "Embedded Systems Engineer", icon: Cpu },
+  { label: "Blockchain Developer", icon: Blocks },
+  { label: "Web Developer", icon: Globe },
+
+  { label: "UI/UX Designer", icon: Palette },
+  { label: "Systems Administrator", icon: Terminal },
+  { label: "Solutions Architect", icon: GitBranch },
+  { label: "IT Support Specialist", icon: Settings },
+
+  { label: "Security Analyst", icon: ShieldCheck },
+  { label: "Technical Lead", icon: GitBranch },
+  { label: "Software Architect", icon: Layers },
+  { label: "Product Manager", icon: Search },
+
+  { label: "Student", icon: GraduationCap },
 ];
 
 // Skill Tags Component
@@ -208,4 +252,11 @@ export const availableSkills = [
   'Playwright',
   'GraphQL',
   'REST API',
+];
+
+// Dashboard sidebar links
+export const navLinksDashboard = [
+  { label: 'Questions', href: '/questions' },
+  { label: 'Tags', href: '/tags' },
+  { label: 'Users', href: '/users' },
 ];

@@ -38,7 +38,24 @@ export default function RootLayout({ children }: { children: React.ReactNode; })
       <body 
         className={`${inter.className} antialiased`}
       >
-        <ClerkProvider>
+        <ClerkProvider
+          appearance={{
+            elements: {
+              formButtonPrimary: {
+                background: "linear-gradient(135deg, hsl(217 91% 60%), hsl(258 90% 66%))",
+                color: "white",
+                border: "none",
+                borderRadius: "0.75rem",
+                fontWeight: "600",
+              },
+
+              formButtonPrimary__hover: {
+                background:
+                  "linear-gradient(135deg, hsl(217 91% 65%), hsl(258 90% 70%))",
+              },
+            },
+          }}
+        >
           {children}
         </ClerkProvider>
       </body>

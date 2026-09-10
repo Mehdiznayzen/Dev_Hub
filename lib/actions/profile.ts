@@ -20,12 +20,13 @@ interface CreateProfileData {
 export const searchProfile = async () => {
     try {
         const { userId } = await auth();
-        if(!userId){
+
+        if (!userId) {
             throw new Error('User not authenticated');
         }
 
         const profile = await db.query.profiles.findFirst({
-            where: eq(profiles.userId, userId)
+            where: eq(profiles.userId, userId),
         });
 
         if (!profile) {
@@ -37,7 +38,7 @@ export const searchProfile = async () => {
         console.error('Error searching profile:', error);
         throw new Error('Failed to search profile');
     }
-}
+};
 
 export const createProfile = async (data: CreateProfileData) => {
     try {
@@ -48,12 +49,12 @@ export const createProfile = async (data: CreateProfileData) => {
         }
 
         // 2. Trouver l'utilisateur dans notre DB
-        const user = await db.query.users.findFirst({
-            where: eq(users.clerkUserId, clerkUserId),
-        });
-        if(!user) {
-            throw new Error('User not found in the database');
-        }
+        // const user = await db.query.users.findFirst({
+        //     where: eq(users.clerkUserId, clerkUserId),
+        // });
+        // if(!user) {
+        //     throw new Error('User not found in the database');
+        // }
 
         // 3. Créer le profil
         const profileId = crypto.randomUUID();
