@@ -1,8 +1,16 @@
+import PageShell from "@/components/dashboard/PageShell";
 
 const ShowUsersPage = () => {
   return (
-    <div>ShowUsersPage</div>
-  )
-}
+    <PageShell
+      active="Users"
+      title="Users"
+      subtitle="Discover developers from the community"
+      showSearch
+    >
+      <div>ShowUsersPage</div>
+    </PageShell>
+  );
+};
 
-export default ShowUsersPage
+export default ShowUsersPage;

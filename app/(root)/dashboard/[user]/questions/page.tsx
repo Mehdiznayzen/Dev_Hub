@@ -2,6 +2,7 @@
 
 import CommunitySidebar from "@/components/dashboard/CommunitySidebar";
 import EmptyState from "@/components/dashboard/EmptyState";
+import PageShell from "@/components/dashboard/PageShell";
 import QuestionFilters from "@/components/dashboard/QuestionsFilters";
 import { useQuestionsSearch } from "@/components/dashboard/QuestionsHeader";
 import QuestionList from "@/components/dashboard/QuestionsList";
@@ -11,7 +12,14 @@ export default function QuestionsPage() {
   const { query, setQuery, filtered } = useQuestionsSearch();
 
   return (
-    <>
+    <PageShell
+      active="Questions"
+      title="Questions"
+      subtitle="Explore questions from the developer community"
+      showAskButton
+      showSearch
+    >
+
       <QuestionFilters />
 
       <div className="lg:grid lg:grid-cols-[1fr_260px] lg:gap-8">
@@ -31,6 +39,6 @@ export default function QuestionsPage() {
           </div>
         </div>
       </div>
-    </>
+    </PageShell>
   );
 }

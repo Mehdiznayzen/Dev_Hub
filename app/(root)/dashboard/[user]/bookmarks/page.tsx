@@ -1,7 +1,13 @@
+import PageShell from "@/components/dashboard/PageShell"
 
 const BookmarksPage = () => {
   return (
-    <div>BookmarksPage</div>
+    <PageShell
+      showAskButton
+      showSearch
+    >
+      <div>BookmarksPage</div>
+    </PageShell>
   )
 }
 
