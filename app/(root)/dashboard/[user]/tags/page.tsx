@@ -6,8 +6,8 @@ const TagsPage = () => {
       active="Tags" 
       title="Tags" 
       subtitle="Explore topics and technologies from the developer community" 
-      showAskButton 
-      showSearch 
+      showAskButton={false}
+      showSearch
     > 
       <div>TagsPage</div> 
     </PageShell> 

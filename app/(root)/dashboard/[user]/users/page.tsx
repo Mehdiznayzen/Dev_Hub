@@ -7,6 +7,7 @@ const ShowUsersPage = () => {
       title="Users"
       subtitle="Discover developers from the community"
       showSearch
+      showAskButton={false}
     >
       <div>ShowUsersPage</div>
     </PageShell>

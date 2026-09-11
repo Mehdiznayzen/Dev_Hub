@@ -49,12 +49,12 @@ export const createProfile = async (data: CreateProfileData) => {
         }
 
         // 2. Trouver l'utilisateur dans notre DB
-        // const user = await db.query.users.findFirst({
-        //     where: eq(users.clerkUserId, clerkUserId),
-        // });
-        // if(!user) {
-        //     throw new Error('User not found in the database');
-        // }
+        const user = await db.query.users.findFirst({
+            where: eq(users.clerkUserId, clerkUserId),
+        });
+        if(!user) {
+            throw new Error('User not found in the database');
+        }
 
         // 3. Créer le profil
         const profileId = crypto.randomUUID();
