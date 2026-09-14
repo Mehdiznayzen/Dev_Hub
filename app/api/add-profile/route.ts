@@ -18,7 +18,7 @@ export const POST = async (request: Request) => {
     );
 
   } catch (error) {
-    console.error('Error in POST /add-profile:', error);
+    console.error('Error in POST /add-profile: ', error);
 
     return Response.json(
       {

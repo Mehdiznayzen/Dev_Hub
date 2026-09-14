@@ -8,6 +8,21 @@ interface CreateQuestionProps {
     content: string;
 }
 
+export const getAllQuestions = async () => {
+    try {
+        const { userId: clerkUserId } = await auth();
+        if(!clerkUserId){
+            throw new Error("User not authenticated");
+        }
+
+        const questions = await db.query.questions.findMany();
+        return questions;
+    } catch (error) {
+        console.error("Error getting all questions: ", error);
+        throw new Error("Failed to get all questions");
+    }
+}
+
 export const createQuestion = async (data: CreateQuestionProps) => {
     try {
         // 1. Vérifier l'authentification Clerk

@@ -82,9 +82,6 @@ const ProfileForm = ({ disabled, avatarUrl, setAvatarUrl, fullName, setFullName,
             if(response.status === 200){
                 router.push(`/dashboard/${response.data.profile.userId}/questions`);
             }
-
-            const data = await response.data;
-            console.log('Response from server:', data);
         }catch(error){
             console.error('Error submitting profile:', error);
         }finally{

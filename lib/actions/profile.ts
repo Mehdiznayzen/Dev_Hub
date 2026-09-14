@@ -1,6 +1,12 @@
-import { profiles, profileSkills, skills, users } from "@/drizzle/schema";
+import {
+    profiles,
+    profileSkills,
+    skills,
+    users,
+} from "@/drizzle/schema";
+
 import { db } from "../db";
-import { auth } from '@clerk/nextjs/server';
+import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
 interface CreateProfileData {
@@ -17,16 +23,37 @@ interface CreateProfileData {
     avatarUrl: string | null;
 }
 
+/* =========================================================
+   SEARCH PROFILE
+========================================================= */
+
 export const searchProfile = async () => {
     try {
-        const { userId } = await auth();
-
-        if (!userId) {
-            throw new Error('User not authenticated');
+        const { userId: clerkUserId } = await auth();
+        if (!clerkUserId) {
+            throw new Error("User not authenticated");
         }
 
+        // Chercher notre user avec son Clerk ID
+        const user = await db.query.users.findFirst({
+            where: eq(users.clerkUserId, clerkUserId),
+        });
+
+        if (!user) {
+            throw new Error("User not found in database");
+        }
+
+        // IMPORTANT :
+        // profiles.userId = users.id
         const profile = await db.query.profiles.findFirst({
-            where: eq(profiles.userId, userId),
+            where: eq(profiles.userId, user.id),
+            with: {
+                profileSkills: {
+                    with: {
+                        skill: true,
+                    },
+                },
+            },
         });
 
         if (!profile) {
@@ -34,75 +61,206 @@ export const searchProfile = async () => {
         }
 
         return profile;
+
     } catch (error) {
-        console.error('Error searching profile:', error);
-        throw new Error('Failed to search profile');
+        console.error("Error searching profile:", error);
+        throw new Error("Failed to search profile");
     }
 };
 
+
+/* =========================================================
+   CREATE PROFILE
+========================================================= */
+
 export const createProfile = async (data: CreateProfileData) => {
     try {
-        // 1. Récupérer l'utilisateur connecté avec Clerk
+        /* -----------------------------------------
+           1. Récupérer Clerk User ID
+        ----------------------------------------- */
+
         const { userId: clerkUserId } = await auth();
+
         if (!clerkUserId) {
-            throw new Error('User not authenticated');
+            throw new Error("User not authenticated");
         }
 
-        // 2. Trouver l'utilisateur dans notre DB
+
+        /* -----------------------------------------
+           2. Trouver notre user dans PostgreSQL
+        ----------------------------------------- */
+
         const user = await db.query.users.findFirst({
             where: eq(users.clerkUserId, clerkUserId),
         });
-        if(!user) {
-            throw new Error('User not found in the database');
+
+        if (!user) {
+            throw new Error(
+                `User not found in database for Clerk ID: ${clerkUserId}`
+            );
         }
 
-        // 3. Créer le profil
+
+        /* -----------------------------------------
+           3. Vérifier si le profile existe déjà
+        ----------------------------------------- */
+
+        const existingProfile = await db.query.profiles.findFirst({
+            where: eq(profiles.userId, user.id),
+        });
+
+        if (existingProfile) {
+            throw new Error("Profile already exists");
+        }
+
+
+        /* -----------------------------------------
+           4. Créer le profile
+        ----------------------------------------- */
+
         const profileId = crypto.randomUUID();
 
-        const [profile] = await db.insert(profiles).values({
-            id: profileId,
-            userId: clerkUserId,
-            fullName: data.fullName,
-            bio: data.bio,
-            role: data.role,
-            experience: data.experience,
-            location: data.location,
-            website: data.website,
-            github: data.github,
-            linkedin: data.linkedin,
-            avatarUrl: data.avatarUrl
-        }).returning();
+        const [profile] = await db
+            .insert(profiles)
+            .values({
+                id: profileId,
 
-        // 4. Créer / récupérer les skills
-        for(const skillName of data.skills){
+                // IMPORTANT !!!
+                // profiles.userId référence users.id
+                userId: user.id,
+
+                fullName: data.fullName,
+                avatarUrl: data.avatarUrl,
+                bio: data.bio,
+                role: data.role,
+                experience: data.experience,
+                location: data.location,
+                github: data.github,
+                linkedin: data.linkedin,
+                website: data.website,
+            })
+            .returning();
+
+
+        /* -----------------------------------------
+           5. Créer / récupérer les skills
+        ----------------------------------------- */
+
+        for (const skillName of data.skills) {
+
+            // Nettoyer le nom
+            const cleanSkillName = skillName.trim();
+
+            if (!cleanSkillName) {
+                continue;
+            }
+
+            /* Chercher le skill existant */
+
             const existingSkill = await db.query.skills.findFirst({
-                where: eq(skills.name, skillName),
+                where: eq(
+                    skills.name,
+                    cleanSkillName
+                ),
             });
 
             let skillId: string;
 
-            if (existingSkill) {
-                skillId = existingSkill.id;
-            } else {
-                skillId = crypto.randomUUID();
+            /* -----------------------------------------
+               Skill existe
+            ----------------------------------------- */
 
-                await db.insert(skills).values({
-                    id: skillId,
-                    name: skillName,
-                });
+            if (existingSkill) {
+
+                skillId = existingSkill.id;
+
             }
 
-            // 5. Relier le skill au profil
-            await db.insert(profileSkills).values({
-                profileId,
-                skillId,
-            });
-        };
+            /* -----------------------------------------
+               Skill n'existe pas
+            ----------------------------------------- */
 
-        return profile;
+            else {
+
+                skillId = crypto.randomUUID();
+
+                await db
+                    .insert(skills)
+                    .values({
+                        id: skillId,
+                        name: cleanSkillName,
+                    });
+            }
+
+
+            /* -----------------------------------------
+               6. Vérifier si le lien existe déjà
+            ----------------------------------------- */
+
+            const existingProfileSkill =
+                await db.query.profileSkills.findFirst({
+                    where: (profileSkillsTable, { and, eq }) =>
+                        and(
+                            eq(
+                                profileSkillsTable.profileId,
+                                profileId
+                            ),
+                            eq(
+                                profileSkillsTable.skillId,
+                                skillId
+                            )
+                        ),
+                });
+
+
+            /* -----------------------------------------
+               7. Relier profile -> skill
+            ----------------------------------------- */
+
+            if (!existingProfileSkill) {
+
+                await db
+                    .insert(profileSkills)
+                    .values({
+                        profileId,
+                        skillId,
+                    });
+            }
+        }
+
+
+        /* -----------------------------------------
+           8. Retourner le profile avec ses skills
+        ----------------------------------------- */
+
+        const createdProfile =
+            await db.query.profiles.findFirst({
+                where: eq(
+                    profiles.id,
+                    profileId
+                ),
+
+                with: {
+                    profileSkills: {
+                        with: {
+                            skill: true,
+                        },
+                    },
+                },
+            });
+
+
+        return createdProfile;
 
     } catch (error) {
-        console.error('Error creating profile:', error);
-        throw new Error('Failed to create profile');
+
+        console.error(
+            "Error creating profile:",
+            error
+        );
+
+        throw new Error(
+            "Failed to create profile"
+        );
     }
-}
+};
