@@ -1,7 +1,5 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Users, MessageCircle, TrendingUp } from 'lucide-react';
-
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -29,10 +27,4 @@ export const avatarColors = [
   "from-amber-500 to-orange-500",
   "from-rose-500 to-pink-500",
   "from-indigo-500 to-blue-500",
-];
-
-export const communityStats = [
-  { icon: Users, label: 'developers', value: '12.4k' },
-  { icon: TrendingUp, label: 'questions', value: '3.8k' },
-  { icon: MessageCircle, label: 'answers', value: '8.9k' },
 ];
