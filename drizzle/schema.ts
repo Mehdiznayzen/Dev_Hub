@@ -92,10 +92,6 @@ export const answers = pgTable("answers", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-/* =========================================================
-   RELATIONS
-========================================================= */
-
 /* =========================
    USERS RELATIONS
 ========================= */

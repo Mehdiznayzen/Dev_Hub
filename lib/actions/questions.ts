@@ -15,11 +15,58 @@ export const getAllQuestions = async () => {
             throw new Error("User not authenticated");
         }
 
-        const questions = await db.query.questions.findMany();
+        const questions = await db.query.questions.findMany({
+            with: {
+                user: {
+                    with: {
+                        profile: true
+                    }
+                },
+                answers: true
+            }
+        });
         return questions;
     } catch (error) {
         console.error("Error getting all questions: ", error);
         throw new Error("Failed to get all questions");
+    }
+}
+
+export const getQuestionById = async (questionId: string) => {
+    try {
+        const { userId: clerkUserId } = await auth();
+        if(!clerkUserId){
+            throw new Error("User not authenticated");
+        }
+
+        const question = await db.query.questions.findFirst({
+            where: eq(questions.id, questionId),
+            with: {
+                user: {
+                    with: {
+                        profile: true
+                    }
+                },
+                answers: {
+                    with: {
+                        user: {
+                            with: {
+                                profile: true,
+                            },
+                        },
+                    },
+                },
+            }
+        });
+
+        if(!question){
+            throw new Error("Question not found.")
+        }
+
+        return question;
+    } catch (error) {
+        console.error("Error getting question by ID:", error);
+        throw new Error("Failed to get question");
     }
 }
 

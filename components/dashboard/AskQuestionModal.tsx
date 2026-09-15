@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { CustomInput } from '../profile/CustomInput';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { Question } from '@/data';
 
-const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => void; }) => {
+const AskQuestionModal = ({ open, onClose, onQuestionCreated }: { open: boolean; onClose: () => void; onQuestionCreated: (question: Question) => void; }) => {
   const [formData, setFormData] = useState({ title: "", content: "" });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   if (!open) return null;

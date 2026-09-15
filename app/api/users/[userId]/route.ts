@@ -4,10 +4,7 @@ export const GET = async (request: Request, { params }: { params: Promise<{ user
   try {
     const { userId } = await params;
 
-    console.log("API User ID:", userId);
-
     const user = await GetUserDetails(userId);
-
     return Response.json(
       {
         success: true,

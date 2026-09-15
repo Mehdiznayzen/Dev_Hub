@@ -30,8 +30,10 @@ interface CreateProfileData {
 export const searchProfile = async () => {
     try {
         const { userId: clerkUserId } = await auth();
+
+        // Aucun utilisateur connecté
         if (!clerkUserId) {
-            throw new Error("User not authenticated");
+            return null;
         }
 
         // Chercher notre user avec son Clerk ID
@@ -39,12 +41,12 @@ export const searchProfile = async () => {
             where: eq(users.clerkUserId, clerkUserId),
         });
 
+        // User Clerk existe mais pas encore dans notre DB
         if (!user) {
-            throw new Error("User not found in database");
+            return null;
         }
 
-        // IMPORTANT :
-        // profiles.userId = users.id
+        // Chercher le profile
         const profile = await db.query.profiles.findFirst({
             where: eq(profiles.userId, user.id),
             with: {
@@ -56,6 +58,7 @@ export const searchProfile = async () => {
             },
         });
 
+        // User existe mais pas encore de profile
         if (!profile) {
             return null;
         }
@@ -64,6 +67,7 @@ export const searchProfile = async () => {
 
     } catch (error) {
         console.error("Error searching profile:", error);
+
         throw new Error("Failed to search profile");
     }
 };

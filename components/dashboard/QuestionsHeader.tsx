@@ -43,9 +43,3 @@ const QuestionsHeader = ({
 }
 
 export default QuestionsHeader;
-
-export function useQuestionsSearch() {
-  return useSearch<Question>(allQuestions, (q) =>
-    `${q.title} ${q.excerpt} ${q.tags.join(' ')} ${q.author}`.toLowerCase()
-  );
-}

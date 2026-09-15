@@ -162,7 +162,7 @@ const UserDetails = ({ userId }: UserDetailsProps) => {
       <div className="animate-fade-up overflow-hidden rounded-2xl border border-border/70 bg-card/50 shadow-2xl backdrop-blur-xl">
         {/* Cover */}
         <div className="relative h-36 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/25 via-accent/15 to-primary/20" />
+          <div className="absolute inset-0 bg-linear-to-r from-primary/25 via-accent/15 to-primary/20" />
           <div className="absolute inset-0 grid-bg opacity-30" />
           <div className="absolute -top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/20 blur-[80px]" />
           <div className="absolute right-1/4 top-0 h-40 w-40 rounded-full bg-accent/15 blur-[70px]" />
