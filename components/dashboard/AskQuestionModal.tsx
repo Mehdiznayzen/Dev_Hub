@@ -1,24 +1,37 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { X, Sparkles, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { CustomInput } from '../profile/CustomInput';
-import axios from 'axios';
-import { toast } from 'sonner';
+import { useEffect, useState } from "react";
+import { X, Sparkles, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CustomInput } from "../profile/CustomInput";
+import axios from "axios";
+import { toast } from "sonner";
 
 interface TagProps {
-  id: number,
-  name: string,
-  description: string
+  id: number;
+  name: string;
+  description: string | null;
 }
 
-const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => void; }) => {
-  const [formData, setFormData] = useState({ title: "", content: "" });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+const AskQuestionModal = ({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) => {
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const [tags, setTags] = useState<TagProps[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [isTagsLoading, setIsTagsLoading] = useState(false);
+
+  console.log(process.env.NEXT_PUBLIC_API_CREATE_QUESTION!)
 
   useEffect(() => {
     if (!open) return;
@@ -43,6 +56,9 @@ const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => voi
     fetchTags();
   }, [open]);
 
+  // =========================
+  // SELECT / UNSELECT TAG
+  // =========================
   const toggleTag = (tagId: number) => {
     setSelectedTagIds((prev) =>
       prev.includes(tagId)
@@ -51,9 +67,12 @@ const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => voi
     );
   };
 
-  if (!open) return null;
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // =========================
+  // INPUT CHANGE
+  // =========================
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
@@ -62,29 +81,69 @@ const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => voi
     }));
   };
 
+  // =========================
+  // CREATE QUESTION
+  // =========================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+
+    if (!formData.title.trim()) {
+      toast.error("Question title is required");
+      return;
+    }
+
+    if (!formData.content.trim()) {
+      toast.error("Question content is required");
+      return;
+    }
+
+    if (selectedTagIds.length === 0) {
+      toast.error("Please select at least one tag");
+      return;
+    }
 
     try {
-      const response = await axios.post(process.env.NEXT_PUBLIC_API_CREATE_PROFILE!, {
-        title: formData.title,
-        content: formData.content
-      });
+      setIsLoading(true);
 
-      if(response.status === 200){
+      const response = await axios.post(process.env.NEXT_PUBLIC_API_CREATE_QUESTION!,
+        {
+          title: formData.title.trim(),
+          content: formData.content.trim(),
+          tagIds: selectedTagIds,
+        }
+      );
+
+      if (response.status === 201) {
+        toast.success("Question created successfully");
+
+        // Reset form
+        setFormData({
+          title: "",
+          content: "",
+        });
+
+        setSelectedTagIds([]);
+
         onClose();
-        toast.info(response.data.message)
       }
-
-      const data = await response.data;
-      console.log('Response from server:', data);
     } catch (error) {
-      
-    }finally{
-      setIsLoading(false)
+      console.error("Error creating question:", error);
+
+      if (axios.isAxiosError(error)) {
+        const message =
+          error.response?.data?.error ||
+          "Failed to create question";
+
+        toast.error(message);
+      } else {
+        toast.error("Failed to create question");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
+
+  if (!open) return null;
 
   return (
     <div
@@ -102,19 +161,25 @@ const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => voi
 
       {/* Modal */}
       <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-2xl border border-border/70 bg-card/80 shadow-2xl backdrop-blur-xl animate-fade-up">
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            <h2 id="ask-question-title" className="text-lg font-semibold text-foreground">
+
+            <h2
+              id="ask-question-title"
+              className="text-lg font-semibold text-foreground"
+            >
               Ask a Question
             </h2>
           </div>
+
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-8 cursor-pointer w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -123,12 +188,14 @@ const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => voi
         {/* Body */}
         <div className="max-h-[70vh] overflow-y-auto px-6 py-5">
           <div className="space-y-5">
+
+            {/* Title */}
             <div className="space-y-2">
               <CustomInput
-                label='Title'
+                label="Title"
                 id="q-title"
                 type="text"
-                name='title'
+                name="title"
                 placeholder="Be specific and imagine you're asking another developer..."
                 value={formData.title}
                 onChange={handleChange}
@@ -136,14 +203,19 @@ const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => voi
               />
             </div>
 
+            {/* Content */}
             <div className="space-y-2">
-              <label htmlFor="q-body" className="block text-sm font-medium text-foreground">
+              <label
+                htmlFor="q-body"
+                className="block text-sm font-medium text-foreground"
+              >
                 Content
               </label>
+
               <textarea
                 id="q-body"
                 value={formData.content}
-                name='content'
+                name="content"
                 onChange={handleChange}
                 rows={6}
                 placeholder="Describe your problem in detail. Include what you've tried and what went wrong..."
@@ -151,6 +223,7 @@ const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => voi
               />
             </div>
 
+            {/* Tags */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-foreground">
                 Tags
@@ -205,35 +278,42 @@ const AskQuestionModal = ({ open, onClose }: { open: boolean; onClose: () => voi
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 border-t border-border/60 px-6 py-4">
+
           <Button
             type="button"
             variant="ghost"
             onClick={onClose}
-            className="text-muted-foreground cursor-pointer hover:text-foreground"
+            disabled={isLoading}
+            className="cursor-pointer text-muted-foreground hover:text-foreground"
           >
             Cancel
           </Button>
+
           <Button
             type="button"
             onClick={handleSubmit}
-            disabled={isLoading}
-            className="bg-linear-to-r cursor-pointer from-primary to-accent text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:shadow-primary/40 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {
-              isLoading ? (
-                <div className='flex items-center gap-1'>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Posting...
-                </div>
-              ) : (
-                "Post Question"
-              )
+            disabled={
+              isLoading ||
+              !formData.title.trim() ||
+              !formData.content.trim() ||
+              selectedTagIds.length === 0
             }
+            className="cursor-pointer bg-linear-to-r from-primary to-accent text-white shadow-lg shadow-primary/20 transition-all duration-300 hover:shadow-primary/40 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-1">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Posting...
+              </div>
+            ) : (
+              "Post Question"
+            )}
           </Button>
+
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default AskQuestionModal;

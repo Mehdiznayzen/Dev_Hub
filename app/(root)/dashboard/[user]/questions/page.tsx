@@ -36,7 +36,6 @@ export default function QuestionsPage() {
 
   return (
     <PageShell
-      active="Questions"
       title="Questions"
       subtitle="Explore questions from the developer community"
       showAskButton
