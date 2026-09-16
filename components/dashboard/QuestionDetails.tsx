@@ -18,13 +18,15 @@ import { FaLinkedin } from "react-icons/fa6";
 
 import { Question } from "@/data";
 import { avatarColors, initials } from "@/lib/utils";
-import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 const QuestionDetails = ({ questionId }: { questionId: string }) => {
   const [question, setQuestion] = useState<Question | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useUser();
+
+  const [answerContent, setAnswerContent] = useState("");
+  const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
 
   useEffect(() => {
     const fetchQuestion = async () => {
@@ -54,6 +56,56 @@ const QuestionDetails = ({ questionId }: { questionId: string }) => {
       fetchQuestion();
     }
   }, [questionId]);
+
+  const handleSubmitAnswer = async () => {
+    if (!answerContent.trim()) {
+      toast.error("Please write an answer.");
+      return;
+    }
+
+    if (!question) {
+      return;
+    }
+
+    try {
+      setIsSubmittingAnswer(true);
+
+      const response = await axios.post(process.env.NEXT_PUBLIC_API_GET_CREATE_ANSWER!, {
+        questionId: question.id,
+        content: answerContent.trim(),
+      });
+
+      if (response.status === 201) {
+        const newAnswer = response.data.answer;
+
+        setQuestion((prev) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            answers: [...(prev.answers ?? []), newAnswer],
+          };
+        });
+
+        setAnswerContent("");
+
+        toast.success("Your answer has been posted.");
+      }
+    } catch (error) {
+      console.error("Error posting answer:", error);
+
+      if (axios.isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.error ||
+            "Unable to post your answer."
+        );
+      } else {
+        toast.error("Unable to post your answer.");
+      }
+    } finally {
+      setIsSubmittingAnswer(false);
+    }
+  };
 
   // Loading
   if (isLoading) {
@@ -98,15 +150,10 @@ const QuestionDetails = ({ questionId }: { questionId: string }) => {
   }
 
   const profile = question.user?.profile;
-
   const authorName = profile?.fullName || question.user?.username || "Unknown user";
-
   const username = question.user?.username || "unknown";
-
   const answerCount = question.answers?.length ?? 0;
-
   const colorIndex = String(question.id).charCodeAt(0) % avatarColors.length;
-
   const formattedQuestionDate = new Date(question.createdAt).toLocaleDateString(
       "en-US",
       {
@@ -399,6 +446,50 @@ const QuestionDetails = ({ questionId }: { questionId: string }) => {
 
             </div>
           )}
+
+          {/* Write an answer */}
+          <div className="mt-10 rounded-2xl border border-border/70 bg-card/40 p-6 sm:p-8">
+
+            <div className="mb-5">
+              <h2 className="text-xl font-bold text-foreground">
+                Your Answer
+              </h2>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                Share your knowledge and help other developers.
+              </p>
+            </div>
+
+            <textarea
+              value={answerContent}
+              onChange={(e) => setAnswerContent(e.target.value)}
+              placeholder="Write your answer here..."
+              disabled={isSubmittingAnswer}
+              rows={8}
+              className="w-full resize-y rounded-xl border border-border/70 bg-background/60 px-4 py-3 text-sm leading-7 text-foreground outline-none transition placeholder:text-muted-foreground/60 focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-60"
+            />
+
+            <div className="mt-4 flex justify-end">
+              <button
+                type="button"
+                onClick={handleSubmitAnswer}
+                disabled={
+                  isSubmittingAnswer ||
+                  !answerContent.trim()
+                }
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isSubmittingAnswer && (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                )}
+
+                {isSubmittingAnswer
+                  ? "Posting..."
+                  : "Post Your Answer"}
+              </button>
+            </div>
+
+          </div>
 
         </section>
       </div>

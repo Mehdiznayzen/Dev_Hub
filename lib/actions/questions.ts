@@ -3,10 +3,10 @@ import { db } from "../db";
 import { eq } from "drizzle-orm";
 import {
   users,
-  questions,
-  tags,
   questionTags,
+  questions,
 } from "@/drizzle/schema";
+import { profile } from "console";
 
 interface CreateQuestionProps {
   title: string;
@@ -75,6 +75,56 @@ export const getQuestionById = async (questionId: string) => {
         throw new Error("Failed to get question");
     }
 }
+
+export const getUserQuestions = async () => {
+  try {
+    // Utilisateur Clerk connecté
+    const { userId: clerkUserId } = await auth();
+
+    if (!clerkUserId) {
+      throw new Error("User not authenticated");
+    }
+
+    // Récupérer l'utilisateur dans notre DB
+    const user = await db.query.users.findFirst({
+      where: eq(users.clerkUserId, clerkUserId),
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Récupérer les questions créées par cet utilisateur
+    const userQuestions = await db.query.questions.findMany({
+      where: eq(questions.userId, user.id),
+
+      with: {
+        user: {
+          with: {
+            profile: true,
+          },
+        },
+
+        answers: true,
+
+        questionTags: {
+          with: {
+            tag: true,
+          },
+        },
+      },
+
+      orderBy: (questions, { desc }) => [
+        desc(questions.createdAt),
+      ],
+    });
+
+    return userQuestions;
+  } catch (error) {
+    console.error("Error getting user questions:", error);
+    throw error;
+  }
+};
 
 export const createQuestion = async (data: CreateQuestionProps) => {
   try {

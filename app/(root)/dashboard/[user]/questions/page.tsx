@@ -41,8 +41,6 @@ export default function QuestionsPage() {
       showAskButton
       showSearch
     >
-      <QuestionFilters />
-
       <div className="lg:grid lg:grid-cols-[1fr_260px] lg:gap-8">
         <div>
           {isLoading ? (

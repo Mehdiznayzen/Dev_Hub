@@ -69,7 +69,6 @@ export const profileSkills = pgTable("profile_skills", {
 /* =========================
    QUESTIONS
 ========================= */
-
 export const questions = pgTable("questions", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
