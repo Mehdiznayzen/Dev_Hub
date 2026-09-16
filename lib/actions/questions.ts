@@ -1,11 +1,17 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
-import { questions, users } from "@/drizzle/schema";
+import {
+  users,
+  questions,
+  tags,
+  questionTags,
+} from "@/drizzle/schema";
 
 interface CreateQuestionProps {
-    title: string;
-    content: string;
+  title: string;
+  content: string;
+  tagIds: number[];
 }
 
 export const getAllQuestions = async () => {
@@ -71,37 +77,74 @@ export const getQuestionById = async (questionId: string) => {
 }
 
 export const createQuestion = async (data: CreateQuestionProps) => {
-    try {
-        // 1. Vérifier l'authentification Clerk
-        const { userId: clerkUserId } = await auth();
+  try {
+    const { userId: clerkUserId } = await auth();
 
-        if (!clerkUserId) {
-            throw new Error("User not authenticated");
-        }
-
-        // 2. Trouver l'utilisateur dans notre DB
-        const user = await db.query.users.findFirst({
-            where: eq(users.clerkUserId, clerkUserId),
-        });
-
-        if (!user) {
-            throw new Error("User not found in the database");
-        }
-
-        // 3. Générer l'ID de la question
-        const questionId = crypto.randomUUID();
-
-        // 4. Créer la question
-        const question = await db.insert(questions).values({
-                id: questionId,
-                userId: user.id,
-                title: data.title,
-                content: data.content,
-            }).returning();
-
-        return question;
-    } catch (error) {
-        console.error("Error creating new question:", error);
-        throw new Error("Failed to create new question");
+    if (!clerkUserId) {
+      throw new Error("User not authenticated");
     }
+
+    const title = data.title.trim();
+    const content = data.content.trim();
+    const tagIds = data.tagIds ?? [];
+
+    if (!title) {
+      throw new Error("Question title is required");
+    }
+
+    if (!content) {
+      throw new Error("Question content is required");
+    }
+
+    if (tagIds.length === 0) {
+      throw new Error("At least one tag is required");
+    }
+
+    // Récupérer l'utilisateur DB
+    const user = await db.query.users.findFirst({
+      where: eq(users.clerkUserId, clerkUserId),
+    });
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Vérifier que TOUS les tags existent
+    const existingTags = await db.query.tags.findMany({
+      where: (tags, { inArray }) =>
+        inArray(tags.id, tagIds),
+    });
+
+    if (existingTags.length !== tagIds.length) {
+      throw new Error("One or more tags do not exist");
+    }
+
+    // Créer la question
+    const [newQuestion] = await db
+      .insert(questions)
+      .values({
+        id: crypto.randomUUID(),
+        userId: user.id,
+        title,
+        content,
+      })
+      .returning();
+
+    // Créer les relations question <-> tags
+    await db.insert(questionTags).values(
+      tagIds.map((tagId) => ({
+        questionId: newQuestion.id,
+        tagId,
+      }))
+    );
+
+    return {
+      success: true,
+      question: newQuestion,
+      tags: existingTags,
+    };
+  } catch (error) {
+    console.error("Error creating question:", error);
+    throw error;
+  }
 };

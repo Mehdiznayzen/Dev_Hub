@@ -104,7 +104,6 @@ export const createProfile = async (data: CreateProfileData) => {
             );
         }
 
-
         /* -----------------------------------------
            3. Vérifier si le profile existe déjà
         ----------------------------------------- */
@@ -236,13 +235,9 @@ export const createProfile = async (data: CreateProfileData) => {
         /* -----------------------------------------
            8. Retourner le profile avec ses skills
         ----------------------------------------- */
-
         const createdProfile =
             await db.query.profiles.findFirst({
-                where: eq(
-                    profiles.id,
-                    profileId
-                ),
+                where: eq(profiles.id, profileId),
 
                 with: {
                     profileSkills: {
@@ -257,14 +252,7 @@ export const createProfile = async (data: CreateProfileData) => {
         return createdProfile;
 
     } catch (error) {
-
-        console.error(
-            "Error creating profile:",
-            error
-        );
-
-        throw new Error(
-            "Failed to create profile"
-        );
+        console.error("Error creating profile:", error);
+        throw new Error("Failed to create profile");
     }
 };

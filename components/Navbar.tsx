@@ -22,7 +22,6 @@ const Navbar = () => {
     const getProfile = async () => {
       try {
         const response = await axios.get(process.env.NEXT_PUBLIC_API_GET_PROFILE!);
-        console.log("Mon response is ", response)
 
         const data = await response.data;
 

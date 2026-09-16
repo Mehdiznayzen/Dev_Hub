@@ -1,11 +1,17 @@
 "use client";
 
-import { popularTags } from "@/data";
 import { useEffect, useState } from "react";
 import { Users, MessageCircle, TrendingUp } from "lucide-react";
 import axios from "axios";
 
+interface TagsProps {
+  id: number,
+  name: string,
+  description: string
+}
+
 const CommunitySidebar = () => {
+  const [tags, setTags] = useState<TagsProps[]>([]);
   const [communitydata, setCommunitydata] = useState([
     {
       icon: Users,
@@ -31,15 +37,18 @@ const CommunitySidebar = () => {
       try {
         setIsLoading(true);
 
-        const [responseUsers, responseQuestions, responseAnswers] = await Promise.all([
+        const [responseUsers, responseQuestions, responseAnswers, responseTags] = await Promise.all([
           axios.get(process.env.NEXT_PUBLIC_API_GET_USERS!),
           axios.get(process.env.NEXT_PUBLIC_API_GET_QUESTIONS!),
           axios.get(process.env.NEXT_PUBLIC_API_GET_ANSWERS_DETAILS!),
+          axios.get(process.env.NEXT_PUBLIC_API_GET_ALL_TAG!),
         ]);
 
         const usersCount = responseUsers.data.users?.length ?? 0;
         const questionsCount = responseQuestions.data.questions.length ?? 0;
         const answersCount = responseAnswers.data.answers.length ?? 0;
+        const tags = responseTags.data.tags;
+        setTags(tags.slice(0, 5))
 
         setCommunitydata([
           {
@@ -106,14 +115,16 @@ const CommunitySidebar = () => {
         </h2>
 
         <div className="mt-4 flex flex-wrap gap-1.5">
-          {popularTags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-md border border-border/70 bg-secondary/50 px-2 py-0.5 text-xs font-medium text-foreground/80 transition-colors hover:border-primary/40 hover:text-foreground"
-            >
-              {tag}
-            </span>
-          ))}
+          {
+            tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="rounded-md border border-border/70 bg-secondary/50 px-2 py-0.5 text-xs font-medium text-foreground/80 transition-colors hover:border-primary/40 hover:text-foreground"
+              >
+                {tag.name}
+              </span>
+            ))
+          }
         </div>
       </div>
     </aside>

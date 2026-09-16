@@ -7,6 +7,7 @@ import {
   varchar,
   integer,
   boolean,
+  serial,
 } from "drizzle-orm/pg-core";
 
 /* =========================
@@ -92,6 +93,31 @@ export const answers = pgTable("answers", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const tags = pgTable("tags", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length : 50 }).notNull().unique(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});
+
+export const questionTags = pgTable(
+  "question_tags",
+  {
+    questionId: text("question_id")
+      .notNull()
+      .references(() => questions.id, { onDelete: "cascade" }),
+
+    tagId: integer("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+  },
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.questionId, table.tagId],
+    }),
+  })
+);
+
 /* =========================
    USERS RELATIONS
 ========================= */
@@ -166,6 +192,8 @@ export const questionsRelations = relations(
     }),
 
     answers: many(answers),
+
+    questionTags: many(questionTags),
   })
 );
 
@@ -184,6 +212,34 @@ export const answersRelations = relations(
     user: one(users, {
       fields: [answers.userId],
       references: [users.id],
+    }),
+  })
+);
+
+/* =========================
+   TAGS RELATIONS
+========================= */
+export const tagsRelations = relations(
+  tags,
+  ({ many }) => ({
+    questionTags: many(questionTags),
+  })
+);
+
+/* =========================
+   QUESTION TAGS RELATIONS
+========================= */
+export const questionTagsRelations = relations(
+  questionTags,
+  ({ one }) => ({
+    question: one(questions, {
+      fields: [questionTags.questionId],
+      references: [questions.id],
+    }),
+
+    tag: one(tags, {
+      fields: [questionTags.tagId],
+      references: [tags.id],
     }),
   })
 );

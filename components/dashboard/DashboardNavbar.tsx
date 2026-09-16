@@ -9,14 +9,12 @@ import Image from 'next/image';
 import { ClerkLoaded, ClerkLoading, UserButton } from '@clerk/nextjs';
 
 interface QuestionsNavbarProps {
-    onAskQuestion?: () => void;
     searchPlaceholder?: string;
     searchValue?: string;
     onSearchChange?: (v: string) => void;
-    activeLink?: string;
 }
 
-const DashboardNavbar = ({ onAskQuestion, searchPlaceholder = 'Search questions...', searchValue, onSearchChange, activeLink }: QuestionsNavbarProps) => {
+const DashboardNavbar = ({ searchPlaceholder = 'Search questions...', searchValue, onSearchChange }: QuestionsNavbarProps) => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
