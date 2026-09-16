@@ -79,7 +79,6 @@ const ShowUsersPage = () => {
 
   return (
     <PageShell
-      active="Users"
       title="Users"
       subtitle="Discover developers from the community"
       showSearch
