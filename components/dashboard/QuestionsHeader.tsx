@@ -2,10 +2,7 @@
 
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { questions as allQuestions } from '@/data/index';
-import type { Question } from '@/data/index';
 import QuestionFilters from './QuestionsFilters';
-import { useSearch } from './useSearch';
 
 interface QuestionsHeaderProps {
     count: number;
